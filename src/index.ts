@@ -13,7 +13,7 @@ import { Parser } from './Parser';
 const execute = () => {
 	const srcPath = process.argv[2];
 	const src = fs.readFileSync(
-		srcPath || path.resolve(__dirname, 'test.arp'),
+		srcPath || path.resolve(__dirname, '..', 'test.arp'),
 		{
 			encoding: 'utf-8',
 		}
