@@ -8,6 +8,7 @@ export enum TokenType {
 	SubtractOperator,
 	MultiplyOperator,
 	DivideOperator,
+	IfOperator,
 }
 
 export class Token {
@@ -73,8 +74,25 @@ class StringValue extends Token {
 	}
 }
 
+class IfOperator extends Token {
+	constructor() {
+		super(TokenType.IfOperator, 'if');
+	}
+}
+
+const getOperatorInstance = (literal: string) => {
+	switch (literal) {
+		case 'if':
+			return new IfOperator();
+	}
+};
+
 const isNumber = (value: string) => {
 	return /[0-9]+/.test(value);
+};
+
+const isAlpha = (value: string) => {
+	return /[a-zA-Z]/.test(value);
 };
 
 export class Lexer {
@@ -92,8 +110,10 @@ export class Lexer {
 		let i = 0,
 			srcLength = this._source.length,
 			readingString = false,
+			readingLiteral = false,
 			tempString = '',
-			tempNumber = '';
+			tempNumber = '',
+			tempLiteral = '';
 		while (i < srcLength) {
 			const char = this._source[i];
 			switch (char) {
@@ -139,16 +159,40 @@ export class Lexer {
 						tempString += char;
 						i++;
 					} else {
-						// number
-						tempNumber += char;
-						if (
-							i + 1 < srcLength &&
-							!isNumber(this._source[i + 1])
-						) {
-							this._tokens.push(new NumberValue(tempNumber));
-							tempNumber = '';
+						if (!readingLiteral && isAlpha(char)) {
+							// start reading literal
+							readingLiteral = true;
+							tempLiteral += char;
+							i++;
+							break;
+						} else if (readingLiteral) {
+							tempLiteral += char;
+							if (
+								i + 1 < srcLength &&
+								this._source[i + 1] === ' '
+							) {
+								// end literal
+								this._tokens.push(
+									getOperatorInstance(tempLiteral)
+								);
+								tempLiteral = '';
+								readingLiteral = false;
+							}
+							i++;
+							break;
+						} else {
+							// number
+							tempNumber += char;
+							if (
+								i + 1 < srcLength &&
+								!isNumber(this._source[i + 1])
+							) {
+								this._tokens.push(new NumberValue(tempNumber));
+								tempNumber = '';
+							}
+							i++;
+							break;
 						}
-						i++;
 					}
 					break;
 			}

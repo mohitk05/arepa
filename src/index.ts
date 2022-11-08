@@ -22,7 +22,7 @@ const execute = () => {
 	const ast = new Parser(tokens).getAST();
 	const output = new Evaluator().evaluate(ast);
 	console.log(output);
-	// return output;
+	return output;
 };
 
 execute();

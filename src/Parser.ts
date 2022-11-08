@@ -1,7 +1,7 @@
 import { Token, TokenType } from './Lexer';
 
 interface ASTNode {
-	evaluate(): string | number;
+	evaluate(): string | number | boolean;
 }
 
 class Primitive implements ASTNode {
@@ -26,6 +26,7 @@ export enum OperatorType {
 	Subract,
 	Multiply,
 	Divide,
+	If,
 }
 
 class Expression implements ASTNode {
@@ -36,7 +37,7 @@ class Expression implements ASTNode {
 		this.args = [];
 	}
 
-	evaluate(): string | number {
+	evaluate(): string | number | boolean {
 		return '';
 	}
 }
@@ -142,6 +143,28 @@ class Division extends Expression {
 	}
 }
 
+class Comparison extends Expression {
+	args: ASTNode[];
+	constructor() {
+		super(OperatorType.If);
+	}
+
+	evaluate() {
+		if (this.args.length > 3) {
+			throw new Error(
+				'If operator cannot have more that 3 arguments. Usage: (if condition true-exp false-exp)'
+			);
+		}
+
+		const condition = this.args[0];
+		if (condition.evaluate()) {
+			return this.args[1].evaluate();
+		} else {
+			return this.args[2].evaluate();
+		}
+	}
+}
+
 class Stack<T> {
 	stack: Array<T>;
 	constructor() {
@@ -212,6 +235,10 @@ export class Parser {
 					break;
 				case TokenType.DivideOperator:
 					stack.push(new Division());
+					i++;
+					break;
+				case TokenType.IfOperator:
+					stack.push(new Comparison());
 					i++;
 					break;
 				case TokenType.NumberValue:
