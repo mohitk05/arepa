@@ -159,7 +159,7 @@ class Comparison extends Expression {
 		const condition = this.args[0];
 		if (condition.evaluate()) {
 			return this.args[1].evaluate();
-		} else {
+		} else if (this.args[2]) {
 			return this.args[2].evaluate();
 		}
 	}
