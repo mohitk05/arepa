@@ -257,32 +257,31 @@ class FunctionCall extends Expression {
   }
 
   evaluate(argContext?: FunctionArgContext): string | number | boolean {
-    const functionArguments = this.args as (Primitive | List)[];
-    return FunctionCall.apply(this._function, functionArguments, argContext);
+    return FunctionCall.apply(this._function, this.args, argContext);
   }
 
-  static flatten(args: (Primitive | List)[]): (string | number | boolean)[] {
+  static flatten(
+    args: LiteralOrList[],
+    argContext?: FunctionArgContext
+  ): (string | number | boolean)[] {
     return args.reduce((acc, curr) => {
-      if (curr instanceof Primitive || curr instanceof Expression) {
-        return [...acc, curr.evaluate()];
+      if (curr instanceof Literal || curr instanceof Expression) {
+        return [...acc, curr.evaluate(argContext)];
       } else {
-        return [
-          ...acc,
-          ...FunctionCall.flatten(curr.args as (Primitive | List)[]),
-        ];
+        return [...acc, ...FunctionCall.flatten(curr.args)];
       }
     }, []);
   }
 
   static apply(
     func: LanguageFunction,
-    args: (Primitive | List)[],
+    args: LiteralOrList[],
     prevArgContext?: FunctionArgContext
   ): string | number | boolean {
-    const argValues = FunctionCall.flatten(args);
+    const argValues = FunctionCall.flatten(args, prevArgContext);
     const argContext: Record<string, string | number | boolean> = {};
     func.arguments.args.forEach((arg, i) => {
-      const value = arg.evaluate(prevArgContext) as string;
+      const value = arg.evaluate() as string;
       argContext[value] = argValues[i];
     });
 

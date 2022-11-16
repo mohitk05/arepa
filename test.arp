@@ -1,13 +1,6 @@
 (
     (defunc add (a b) (+ a b)) 
-    (add 1 (add 2 3))
     (defunc square (a) (* a a))
-    (square 3)
-    (add 2 (square 4))
-    (defunc concat (a b) (+ a " " b))
-    (concat "a" "b")
-
-    (defunc even_or_odd (num) (if (re num 2) "odd" "even"))
-    (even_or_odd 4)
-    (even_or_odd 7)
+    (defunc add_and_square (a b) (square (add a b)))
+    (add_and_square 2 3)
 )
